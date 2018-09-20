@@ -1,2 +1,4 @@
 
 exec setxkbmap dvorak
+
+bind e exec emacs
