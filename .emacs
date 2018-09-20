@@ -1,6 +1,10 @@
 
 ;; This file is incomplete, but better than nothing
 
+(require 'package)
+
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+
 (package-initialize)
 
 (setq inhibit-startup-screen t)
@@ -23,6 +27,8 @@
 (scroll-bar-mode -1)
 (blink-cursor-mode -1)
 
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
             (push '("<=" . ?≤) prettify-symbols-alist)
@@ -44,7 +50,7 @@
 (global-set-key (kbd "M-p") 'scroll-down-line)
 (global-set-key (kbd "M-n") 'scroll-up-line)
 
-; (set-default-font "Terminus-12")
+(set-default-font "Monospace-9")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -52,11 +58,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes (quote (wombat)))
- '(package-archives
-   (quote
-    (("gnu" . "http://elpa.gnu.org/packages/")
-     ("melpa-stable" . "http://stable.melpa.org/packages/"))))
- '(package-selected-packages (quote (haskell-mode))))
+ '(package-selected-packages (quote (highlight-indent-guides haskell-mode))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
