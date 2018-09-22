@@ -10,13 +10,15 @@
 (defun install-packages ()
   (interactive)
   (if (not (package-installed-p 'multiple-cursors))
-      (package-install "multiple-cursors"))
+      (package-install 'multiple-cursors))
   (if (not (package-installed-p 'centered-cursor-mode))
-      (package-install "centered-cursor-mode"))
+      (package-install 'centered-cursor-mode))
   (if (not (package-installed-p 'haskell-mode))
-      (package-install "haskell-mode"))
+      (package-install 'haskell-mode))
+  (if (not (package-installed-p 'rjsx-mode))
+      (package-install 'rjsx-mode))
   (if (not (package-installed-p 'highlight-indent-guides))
-      (package-install "highlight-indent-guides")))
+      (package-install 'highlight-indent-guides)))
 
 (install-packages)
 
@@ -29,6 +31,9 @@
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
+
+(if (package-installed-p 'rjsx-mode)
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)))
 
 (setq-default indent-tabs-mode nil)
 
@@ -103,6 +108,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes (quote (wombat)))
+ '(js2-ignored-warnings (quote ("")))
+ '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
    (quote
     (multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
