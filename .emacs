@@ -9,19 +9,26 @@
 
 (defun install-packages ()
   (interactive)
-  (package-install "multiple-cursors")
-  (package-install "centered-cursor-mode")
-  (package-install "haskell-mode")
-  (package-install "highlight-indent-guides"))
+  (if (not (package-installed-p 'multiple-cursors))
+      (package-install "multiple-cursors"))
+  (if (not (package-installed-p 'centered-cursor-mode))
+      (package-install "centered-cursor-mode"))
+  (if (not (package-installed-p 'haskell-mode))
+      (package-install "haskell-mode"))
+  (if (not (package-installed-p 'highlight-indent-guides))
+      (package-install "highlight-indent-guides")))
 
-(if (not (package-installed-p 'multiple-cursors))
-    (install-packages))
+(install-packages)
 
 (setq inhibit-startup-screen t)
 (setq tab-width 2)
 (setq js-indent-level 2)
 (setq js2-basic-offset 2)
 (setq show-paren-delay 0)
+
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(setq create-lockfiles nil)
 
 (setq-default indent-tabs-mode nil)
 
