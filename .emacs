@@ -14,6 +14,9 @@
   (package-install "haskell-mode")
   (package-install "highlight-indent-guides"))
 
+(if (not (package-installed-p 'multiple-cursors))
+    (install-packages))
+
 (setq inhibit-startup-screen t)
 (setq tab-width 2)
 (setq js-indent-level 2)
@@ -42,9 +45,10 @@
 (iswitchb-mode)
 (ido-mode)
 
-(if (boundp 'centered-cursor-mode) (centered-cursor-mode))
+(if (package-installed-p 'centered-cursor-mode)
+    (add-hook 'prog-mode-hook 'centered-cursor-mode))
 
-(if (boundp 'highlight-indent-guides-mode)
+(if (package-installed-p 'highlight-indent-guides-mode)
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 
 (add-hook 'emacs-lisp-mode-hook
@@ -94,7 +98,7 @@
  '(custom-enabled-themes (quote (wombat)))
  '(package-selected-packages
    (quote
-    ("multiple-cursors" "saoeuhraloehculrahoelrc" multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
+    (multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
