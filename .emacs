@@ -63,14 +63,15 @@
 (if (package-installed-p 'highlight-indent-guides-mode)
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 
-(add-hook 'emacs-lisp-mode-hook
+(add-hook 'prog-mode-hook
           (lambda ()
             (push '("<=" . ?≤) prettify-symbols-alist)
-            (push '(">=" . ?≥) prettify-symbols-alist)))
-
-(add-hook 'js2-mode-hook
-          (lambda ()
+            (push '(">=" . ?≥) prettify-symbols-alist)
             (push '("<=" . ?≤) prettify-symbols-alist)
+            (push '("&&" . ?∧) prettify-symbols-alist)
+            (push '("||" . ?∨) prettify-symbols-alist)
+            (push '("<-" . ?←) prettify-symbols-alist)
+            (push '("->" . ?→) prettify-symbols-alist)
             (push '(">=" . ?≥) prettify-symbols-alist)
             (push '("=>" . ?⇒) prettify-symbols-alist)
             (push '("!=" . ?≠) prettify-symbols-alist)))
