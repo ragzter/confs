@@ -22,6 +22,8 @@
 
 (install-packages)
 
+(set-fringe-mode 0)
+
 (setq inhibit-startup-screen t)
 (setq tab-width 2)
 (setq js-indent-level 2)
@@ -60,7 +62,7 @@
 (if (package-installed-p 'centered-cursor-mode)
     (add-hook 'prog-mode-hook 'centered-cursor-mode))
 
-(if (package-installed-p 'highlight-indent-guides-mode)
+(if (package-installed-p 'highlight-indent-guides)
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 
 (add-hook 'prog-mode-hook
@@ -68,8 +70,8 @@
             (push '("<=" . ?≤) prettify-symbols-alist)
             (push '(">=" . ?≥) prettify-symbols-alist)
             (push '("<=" . ?≤) prettify-symbols-alist)
-            (push '("&&" . ?∧) prettify-symbols-alist)
-            (push '("||" . ?∨) prettify-symbols-alist)
+            (push '("&&" . ?⋀) prettify-symbols-alist)
+            (push '("||" . ?⋁) prettify-symbols-alist)
             (push '("<-" . ?←) prettify-symbols-alist)
             (push '("->" . ?→) prettify-symbols-alist)
             (push '(">=" . ?≥) prettify-symbols-alist)
@@ -91,7 +93,7 @@
   (fset 'eval-haskell-code
         "\C-xo:load TTT\C-m\C-xo"))
 
-(global-set-key (kbd "C-c C-n") 'eval-haskell-code)
+(global-set-key (kbd "C-c C-r") 'eval-haskell-code)
 
 (global-set-key (kbd "C-c C-l") 'comment-region)
 (global-set-key (kbd "C-c C-/") 'uncomment-region)

@@ -1,4 +1,5 @@
 
 exec setxkbmap dvorak
+exec xset r rate 200 30
 
 bind e exec emacs
