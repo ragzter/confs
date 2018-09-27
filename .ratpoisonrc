@@ -1,5 +1,7 @@
 
 exec setxkbmap dvorak
 exec xset r rate 200 30
+exec xmodmap ~/.Xmodmap
+exec xrdb -merge ~/.Xresources
 
 bind e exec emacs
