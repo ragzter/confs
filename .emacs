@@ -17,6 +17,8 @@
       (package-install 'haskell-mode))
   (if (not (package-installed-p 'rjsx-mode))
       (package-install 'rjsx-mode))
+  (if (not (package-installed-p 'idris-mode))
+      (package-install 'idris-mode))
   (if (not (package-installed-p 'highlight-indent-guides))
       (package-install 'highlight-indent-guides)))
 
@@ -115,7 +117,7 @@
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
    (quote
-    (multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
+    (idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -126,6 +128,9 @@
 
 (global-hl-line-mode)
 
-(set-face-background hl-line-face "#202020")
+(set-face-background hl-line-face "#101010")
 (set-face-attribute hl-line-face nil :underline nil)
 (set-face-foreground 'highlight nil)
+
+(set-cursor-color "orange")
+(setq-default cursor-type 'hbar)
