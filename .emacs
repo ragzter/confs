@@ -134,3 +134,6 @@
 
 (set-cursor-color "orange")
 (setq-default cursor-type 'hbar)
+
+(if (file-exists-p "~/.emacs_extras.el")
+    (load-file "~/.emacs_extras.el"))
