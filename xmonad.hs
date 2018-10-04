@@ -6,22 +6,24 @@ import XMonad.Util.EZConfig
 import XMonad.Util.Paste
 import XMonad.Actions.CycleWS
 import qualified XMonad.StackSet as W
-import XMonad.Layout.ResizableTile
+import XMonad.Layout.BinarySpacePartition
 
-myLayout = ResizableTall 4 (3/100) (1/2) []
+myLayout = emptyBSP
 
 main = xmonad $ def { modMask = mod4Mask
                     , layoutHook = myLayout }
                     `additionalKeysP`
                     [ ("C-t C-t", toggleWS)
                     , ("C-t c", spawn "xterm")
-                    , ("C-t v", spawn "dmenu_run")
+                    , ("C-t S-1", spawn "dmenu_run")
                     , ("C-t <Tab>", windows W.focusDown)
                     , ("C-t t", sendKey controlMask xK_t)
-                    , ("<Page_Up>", sendMessage Shrink)
-                    , ("<Page_Down>", sendMessage Expand)
-                    , ("C-<Page_Up>", sendMessage MirrorExpand)
-                    , ("C-<Page_Down>", sendMessage MirrorShrink)
+                    , ("<Page_Up>", sendMessage $ ExpandTowards L)
+                    , ("<Page_Down>", sendMessage $ ExpandTowards R)
+                    , ("C-<Page_Up>", sendMessage $ ExpandTowards U)
+                    , ("C-<Page_Down>", sendMessage $ ExpandTowards D)
+                    , ("C-t r", sendMessage Rotate)
+                    , ("C-t s", sendMessage Swap)
                     , ("C-t 0", toggleOrView "1")
                     , ("C-t 1", toggleOrView "2")
                     , ("C-t 2", toggleOrView "3")
