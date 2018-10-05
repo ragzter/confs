@@ -9,16 +9,20 @@ import XMonad.Actions.CopyWindow
 import qualified XMonad.StackSet as W
 import XMonad.Prompt
 import XMonad.Prompt.Window
+import XMonad.Layout.BinarySpacePartition
 
-main = xmonad $ def { modMask = mod4Mask }
+main = xmonad $ def { modMask = mod4Mask
+                    , layoutHook = emptyBSP }
                     `additionalKeysP`
                     [ ("C-t C-t", toggleWS)
                     , ("C-t c", spawn "xterm")
-                    , ("C-t S-1", spawn "dmenu_run")
+                    , ("C-t o", spawn "dmenu_run")
                     , ("C-t <Tab>", windows W.focusDown)
                     , ("C-t t", sendKey controlMask xK_t)
-                    , ("<Page_Up>", sendMessage Expand)
-                    , ("<Page_Down>", sendMessage Shrink)
+                    , ("<Page_Up>", sendMessage $ ExpandTowards U)
+                    , ("<Page_Down>", sendMessage $ ExpandTowards D)
+                    , ("C-<Page_Up>", sendMessage $ ExpandTowards R)
+                    , ("C-<Page_Down>", sendMessage $ ExpandTowards L)
                     , ("C-t a", windows copyToAll)
                     , ("C-t s", windows W.swapDown)
                     , ("C-t k", kill1)
