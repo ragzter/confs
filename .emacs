@@ -22,6 +22,10 @@
   (if (not (package-installed-p 'highlight-indent-guides))
       (package-install 'highlight-indent-guides)))
 
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(column-number-mode 1)
+
 (install-packages)
 
 (set-fringe-mode 0)
