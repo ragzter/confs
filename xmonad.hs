@@ -6,25 +6,39 @@ import XMonad.Util.EZConfig
 import XMonad.Util.Paste
 import XMonad.Actions.CycleWS
 import XMonad.Actions.CopyWindow
+import XMonad.Actions.SpawnOn
 import qualified XMonad.StackSet as W
 import XMonad.Prompt
 import XMonad.Prompt.Window
 import XMonad.Layout.BinarySpacePartition
 
+startup :: X ()
+startup = do
+  spawnOn "1" "emacs"
+  spawnOn "2" "firefox"
+  spawnOn "3" "xterm"
+  spawnOn "3" "xterm"
+
 main = xmonad $ def { modMask = mod4Mask
-                    , layoutHook = emptyBSP }
+                    , layoutHook = emptyBSP
+                    , startupHook = startup
+                    , manageHook = manageSpawn
+                    }
                     `additionalKeysP`
                     [ ("C-t C-t", toggleWS)
                     , ("C-t c", spawn "xterm")
+                    , ("C-t e", spawn "xterm")
+                    , ("C-t g", spawn "firefox")
                     , ("C-t o", spawn "dmenu_run")
                     , ("C-t <Tab>", windows W.focusDown)
                     , ("C-t t", sendKey controlMask xK_t)
+                    , ("C-t s", sendMessage Swap)
+                    , ("C-t r", sendMessage Rotate)
                     , ("<Page_Up>", sendMessage $ ExpandTowards U)
                     , ("<Page_Down>", sendMessage $ ExpandTowards D)
                     , ("C-<Page_Up>", sendMessage $ ExpandTowards R)
                     , ("C-<Page_Down>", sendMessage $ ExpandTowards L)
                     , ("C-t a", windows copyToAll)
-                    , ("C-t s", windows W.swapDown)
                     , ("C-t k", kill1)
                     , ("C-t x", killAllOtherCopies)
                     , ("C-t 0", toggleOrView "1")
