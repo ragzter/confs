@@ -25,6 +25,9 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (column-number-mode 1)
+(display-time-mode 1)
+
+(setq org-startup-folded nil)
 
 (install-packages)
 
@@ -65,11 +68,35 @@
 (iswitchb-mode)
 (ido-mode)
 
+(defun count-lines-buffer ()
+  (save-excursion
+    (let ((opoint (point)) beg end
+	  total before after)
+      (forward-page)
+      (beginning-of-line)
+      (or (looking-at page-delimiter)
+	  (end-of-line))
+      (setq end (point))
+      (backward-page)
+      (setq beg (point))
+      (setq total (count-lines beg end))
+      total)))
+
+(global-set-key (kbd "C-c g") 'goto-line)
+
 (if (package-installed-p 'centered-cursor-mode)
-    (add-hook 'prog-mode-hook 'centered-cursor-mode))
+    (add-hook 'prog-mode-hook
+              (lambda ()
+                (interactive)
+                (if (< (count-lines-buffer) 1000)
+                    (centered-cursor-mode)))))
 
 (if (package-installed-p 'highlight-indent-guides)
-    (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+    (add-hook 'prog-mode-hook
+              (lambda ()
+                (interactive)
+                (if (< (count-lines-buffer) 1000)
+                    (highlight-indent-guides-mode)))))
 
 (add-hook 'prog-mode-hook
           (lambda ()
