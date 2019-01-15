@@ -20,7 +20,9 @@
   (if (not (package-installed-p 'idris-mode))
       (package-install 'idris-mode))
   (if (not (package-installed-p 'highlight-indent-guides))
-      (package-install 'highlight-indent-guides)))
+      (package-install 'highlight-indent-guides))
+  (if (not (package-installed-p 'magit))
+      (package-install 'magit)))
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -83,6 +85,7 @@
       total)))
 
 (global-set-key (kbd "C-c g") 'goto-line)
+(global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
 
 (if (package-installed-p 'centered-cursor-mode)
     (add-hook 'prog-mode-hook
@@ -120,6 +123,7 @@
 (global-set-key (kbd "C-z") 'hippie-expand)
 (global-set-key (kbd "M-p") 'scroll-down-line)
 (global-set-key (kbd "M-n") 'scroll-up-line)
+(global-set-key (kbd "C-x g") 'magit-status)
 
 (defun eval-haskell-code ()
   (interactive)
@@ -148,7 +152,7 @@
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
    (quote
-    (idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
+    (magit idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
