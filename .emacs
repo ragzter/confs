@@ -152,7 +152,7 @@
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
    (quote
-    (magit idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
+    (rjsx-mode magit idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -169,6 +169,91 @@
 
 (set-cursor-color "orange")
 (setq-default cursor-type 'hbar)
+
+(defun find-overlays-specifying (prop pos)
+  (let ((overlays (overlays-at pos))
+        found)
+    (while overlays
+      (let ((overlay (car overlays)))
+        (if (overlay-get overlay prop)
+            (setq found (cons overlay found))))
+      (setq overlays (cdr overlays)))
+    found))
+
+(defun highlight-or-dehighlight-line ()
+  (interactive)
+  (if (find-overlays-specifying
+       'line-highlight-overlay-marker
+       (line-beginning-position))
+      (remove-overlays (line-beginning-position) (+ 1 (line-end-position)))
+    (let ((overlay-highlight (make-overlay
+                              (line-beginning-position)
+                              (+ 1 (line-end-position)))))
+        (overlay-put overlay-highlight 'face '(:background "#006030"))
+        (overlay-put overlay-highlight 'line-highlight-overlay-marker t))))
+
+(global-set-key (kbd "C-c C-c") 'highlight-or-dehighlight-line)
+
+(define-skeleton if-skeleton
+  "If skeleton"
+  nil
+  > "if ("
+  _
+  ") {\n"
+  > "\n"
+  "}"
+  >
+  )
+
+(define-skeleton else-skeleton
+  "Else skeleton"
+  nil
+  " else {\n"
+  > _ "\n"
+  "}"
+  >
+  )
+
+(define-skeleton map-skeleton
+  "Map skeleton"
+  nil
+  ".map(e => {\n"
+  > _ "\n"
+  "})"
+  >
+  )
+
+(define-skeleton map-index-skeleton
+  "Map with index skeleton"
+  nil
+  ".map((e, i) => {\n"
+  > _ "\n"
+  "})"
+  >
+  )
+
+(define-skeleton console-skeleton
+  "Console skeleton"
+  nil
+  "console.log(" _ ")"
+  )
+
+(global-set-key (kbd "C-c C-i") 'if-skeleton)
+(global-set-key (kbd "C-c C-e") 'else-skeleton)
+(global-set-key (kbd "C-c C-m") 'map-skeleton)
+(global-set-key (kbd "C-c C-S-m") 'map-index-skeleton)
+(global-set-key (kbd "C-c C-p") 'console-skeleton)
+
+(eval-after-load 'autoinsert
+  '(define-auto-insert
+     '("\\.js\\'" . "React skeleton")
+     '(nil
+       "\nimport React from 'react'\n\n"
+       "export default props => {\n"
+       > _
+       "\n}\n")))
+
+(auto-insert-mode)
 
 (if (file-exists-p "~/.emacs_extras.el")
     (load-file "~/.emacs_extras.el"))
