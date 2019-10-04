@@ -7,22 +7,26 @@
 
 (package-initialize)
 
+(setq package-check-signature nil)
+
+(defun install-if-not-installed (package)
+  (if (not (package-installed-p package))
+      (package-install package)))
+
+
 (defun install-packages ()
   (interactive)
-  (if (not (package-installed-p 'multiple-cursors))
-      (package-install 'multiple-cursors))
-  (if (not (package-installed-p 'centered-cursor-mode))
-      (package-install 'centered-cursor-mode))
-  (if (not (package-installed-p 'haskell-mode))
-      (package-install 'haskell-mode))
-  (if (not (package-installed-p 'rjsx-mode))
-      (package-install 'rjsx-mode))
-  (if (not (package-installed-p 'idris-mode))
-      (package-install 'idris-mode))
-  (if (not (package-installed-p 'highlight-indent-guides))
-      (package-install 'highlight-indent-guides))
-  (if (not (package-installed-p 'magit))
-      (package-install 'magit)))
+  (mapc
+   'install-if-not-installed
+   '(centered-cursor-mode
+     haskell-mode
+     idris-mode
+     highlight-indent-guides
+     magit
+     prettier-js
+     company-lsp
+     tide
+     web-mode)))
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -152,14 +156,7 @@
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
    (quote
-    (rjsx-mode magit idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+    (web-mode rjsx-mode magit idris-mode centered-cursor-mode haskell-mode highlight-indent-guides))))
 
 (global-hl-line-mode)
 
@@ -257,3 +254,85 @@
 
 (if (file-exists-p "~/.emacs_extras.el")
     (load-file "~/.emacs_extras.el"))
+
+(global-display-line-numbers-mode)
+
+(setq typescript-indent-level 2)
+
+(defun setup-tide-mode ()
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  (prettier-js-mode)
+  ;; company is an optional dependency. You have to
+  ;; install it separately via package-install
+  ;; `M-x package-install [ret] company`
+  (company-mode +1))
+
+;; aligns annotation to the right hand side
+(setq company-tooltip-align-annotations t)
+
+;; formats the buffer before saving
+;; (add-hook 'before-save-hook 'tide-format-before-save)
+
+(add-hook 'typescript-mode-hook #'setup-tide-mode)
+
+;; (require 'company-lsp)
+;; (push 'company-lsp company-backends)
+
+(require 'web-mode)
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+(add-hook 'web-mode-hook
+          (lambda ()
+            (when (string-equal "tsx" (file-name-extension buffer-file-name))
+              (setup-tide-mode))))
+(add-hook 'web-mode-hook
+          (lambda ()
+            (when (string-equal "js" (file-name-extension buffer-file-name))
+              (setup-tide-mode))))
+(add-hook 'web-mode-hook
+          (lambda ()
+            (when (string-equal "ts" (file-name-extension buffer-file-name))
+              (setup-tide-mode))))
+(add-hook 'web-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c C-l") 'comment-region)))
+;; enable typescript-tslint checker
+;; (flycheck-add-mode 'typescript-tslint 'web-mode)
+
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-code-indent-offset 2)
+
+(setq web-mode-content-types-alist
+  '(("jsx" . "\\.js[x]?\\'")))
+
+(setq web-mode-enable-auto-quoting nil)
+
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-css-indent-offset 2)
+(setq web-mode-code-indent-offset 2)
+(setq web-mode-script-padding 2)
+(setq web-mode-attr-indent-offset 2)
+(setq web-mode-enable-css-colorization t)
+
+(defun tide-format-before-save ())
+
+(require 'prettier-js)
+
+(setq-default fill-column 80)
+(add-hook 'org-mode-hook 'auto-fill-mode)
+
+;; (add-hook 'js2-mode-hook 'prettier-js-mode)
+;; (add-hook 'web-mode-hook 'prettier-js-mode)
+;; (add-hook 'typescript-mode-hook 'prettier-js-mode)
+(add-hook 'tide-mode-hook 'prettier-js-mode)
+;; (add-hook 'php-mode-hook 'prettier-js-mode)
+
+; (setq magit-prefer-remote-upstream "raghed")
+; (setq magit-remote-set-if-missing "raghed")
+
+(setq sh-basic-offset 2)
