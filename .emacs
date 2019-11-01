@@ -147,8 +147,8 @@
 (defun font-exists-p (font)
   (if (null (x-list-fonts font)) nil t))
 
-(if (font-exists-p "Fantasque Sans Mono-11")
-    (set-default-font "Fantasque Sans Mono-11")
+(if (font-exists-p "Fantasque Sans Mono-12")
+    (set-default-font "Fantasque Sans Mono-12")
   (set-default-font "Monospace-9"))
 
 (custom-set-variables
