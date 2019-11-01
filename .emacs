@@ -3,7 +3,7 @@
 
 (require 'package)
 
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 
 (package-initialize)
 
@@ -13,18 +13,16 @@
   (if (not (package-installed-p package))
       (package-install package)))
 
-
 (defun install-packages ()
   (interactive)
   (mapc
    'install-if-not-installed
    '(centered-cursor-mode
+     projectile
      haskell-mode
-     idris-mode
      highlight-indent-guides
      magit
      prettier-js
-     company-lsp
      tide
      web-mode)))
 
@@ -38,19 +36,21 @@
 (install-packages)
 
 (set-fringe-mode 0)
+; (setq left-fringe-width 10)
+; (setq right-fringe-width 10)
 
 (setq inhibit-startup-screen t)
 (setq tab-width 2)
 (setq js-indent-level 2)
 (setq js2-basic-offset 2)
 (setq show-paren-delay 0)
+(setq c-basic-offset 2)
+
+(add-hook 'php-mode-hook #'(lambda() (setq c-basic-offset 2)))
 
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
-
-(if (package-installed-p 'rjsx-mode)
-    (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)))
 
 (setq-default indent-tabs-mode nil)
 
@@ -74,6 +74,12 @@
 (iswitchb-mode)
 (ido-mode)
 
+(defun ts-add-electric-pairs ()
+  (setq-local electric-pair-pairs (append electric-pair-pairs '((?\' . ?\'))))
+  (setq-local electric-pair-text-pairs electric-pair-pairs))
+
+(add-hook 'tide-mode-hook 'ts-add-electric-pairs)
+
 (defun count-lines-buffer ()
   (save-excursion
     (let ((opoint (point)) beg end
@@ -89,6 +95,7 @@
       total)))
 
 (global-set-key (kbd "C-c g") 'goto-line)
+(global-set-key (kbd "C-c o") 'occur)
 (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
 
 (if (package-installed-p 'centered-cursor-mode)
@@ -124,17 +131,10 @@
 (global-set-key (kbd "C-l") 'switch-to-buffer)
 (global-set-key (kbd "C-h") 'backward-delete-char-untabify)
 (global-set-key (kbd "M-h") 'backward-kill-word)
-(global-set-key (kbd "C-z") 'hippie-expand)
+(global-set-key (kbd "C-z") 'company-complete)
 (global-set-key (kbd "M-p") 'scroll-down-line)
 (global-set-key (kbd "M-n") 'scroll-up-line)
 (global-set-key (kbd "C-x g") 'magit-status)
-
-(defun eval-haskell-code ()
-  (interactive)
-  (fset 'eval-haskell-code
-        "\C-xo:load TTT\C-m\C-xo"))
-
-(global-set-key (kbd "C-c C-r") 'eval-haskell-code)
 
 (global-set-key (kbd "C-c C-l") 'comment-region)
 (global-set-key (kbd "C-c C-/") 'uncomment-region)
@@ -144,7 +144,12 @@
 (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
-(set-default-font "Monospace-9")
+(defun font-exists-p (font)
+  (if (null (x-list-fonts font)) nil t))
+
+(if (font-exists-p "Fantasque Sans Mono-11")
+    (set-default-font "Fantasque Sans Mono-11")
+  (set-default-font "Monospace-9"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -156,7 +161,14 @@
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
    (quote
-    (web-mode rjsx-mode magit idris-mode centered-cursor-mode haskell-mode highlight-indent-guides))))
+    (company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript typescript-mode php-mode rjsx-mode magit idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
 
 (global-hl-line-mode)
 
@@ -259,6 +271,9 @@
 
 (setq typescript-indent-level 2)
 
+(add-to-list 'load-path "/home/ragnar/.nvm/versions/node/v10.9.0/bin/")
+(add-to-list 'load-path "/home/ragnar/.yarn/bin/")
+
 (defun setup-tide-mode ()
   (interactive)
   (tide-setup)
@@ -266,22 +281,14 @@
   (setq flycheck-check-syntax-automatically '(save mode-enabled))
   (eldoc-mode +1)
   (tide-hl-identifier-mode +1)
-  (prettier-js-mode)
-  ;; company is an optional dependency. You have to
-  ;; install it separately via package-install
-  ;; `M-x package-install [ret] company`
+  (setq-local company-backends
+            '((company-tide company-files)))
   (company-mode +1))
 
 ;; aligns annotation to the right hand side
 (setq company-tooltip-align-annotations t)
 
-;; formats the buffer before saving
-;; (add-hook 'before-save-hook 'tide-format-before-save)
-
 (add-hook 'typescript-mode-hook #'setup-tide-mode)
-
-;; (require 'company-lsp)
-;; (push 'company-lsp company-backends)
 
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
@@ -304,11 +311,16 @@
 ;; enable typescript-tslint checker
 ;; (flycheck-add-mode 'typescript-tslint 'web-mode)
 
+(with-eval-after-load 'flycheck
+  (flycheck-add-mode 'typescript-tslint 'web-mode)
+  )
+
 (setq web-mode-markup-indent-offset 2)
 (setq web-mode-code-indent-offset 2)
 
 (setq web-mode-content-types-alist
-  '(("jsx" . "\\.js[x]?\\'")))
+      '(("jsx" . "\\.js[x]?\\'")
+        ("jsx" . "\\.tsx?\\'")))
 
 (setq web-mode-enable-auto-quoting nil)
 
@@ -326,13 +338,21 @@
 (setq-default fill-column 80)
 (add-hook 'org-mode-hook 'auto-fill-mode)
 
-;; (add-hook 'js2-mode-hook 'prettier-js-mode)
-;; (add-hook 'web-mode-hook 'prettier-js-mode)
-;; (add-hook 'typescript-mode-hook 'prettier-js-mode)
 (add-hook 'tide-mode-hook 'prettier-js-mode)
-;; (add-hook 'php-mode-hook 'prettier-js-mode)
-
-; (setq magit-prefer-remote-upstream "raghed")
-; (setq magit-remote-set-if-missing "raghed")
 
 (setq sh-basic-offset 2)
+
+;; Helm
+
+; (require 'helm-config)
+
+;; Projectile
+
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+(setq company-idle-delay 0.2)
+(setq company-async-timeout 5)
+
+(setq web-mode-auto-close-style 2)

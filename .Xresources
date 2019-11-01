@@ -1,4 +1,4 @@
-xterm*faceName: Monospace
-xterm*faceSize: 9
+xterm*faceName: Fantasque Sans Mono
+xterm*faceSize: 11
 xterm*background: gray6
 xterm*foreground: paleturquoise
