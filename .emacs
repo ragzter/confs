@@ -36,8 +36,6 @@
 (install-packages)
 
 (set-fringe-mode 0)
-; (setq left-fringe-width 10)
-; (setq right-fringe-width 10)
 
 (setq inhibit-startup-screen t)
 (setq tab-width 2)
@@ -62,6 +60,7 @@
          (beginning-of-line))))
 
 (global-set-key (kbd "C-a") 'smart-beginning-of-line)
+(global-set-key (kbd "C-S-h") 'kill-whole-line)
 
 (menu-bar-mode -1)
 (tool-bar-mode -1)
@@ -70,8 +69,6 @@
 
 (electric-pair-mode 1)
 (show-paren-mode 1)
-(global-prettify-symbols-mode)
-(iswitchb-mode)
 (ido-mode)
 
 (defun ts-add-electric-pairs ()
@@ -105,28 +102,6 @@
                 (if (< (count-lines-buffer) 1000)
                     (centered-cursor-mode)))))
 
-(if (package-installed-p 'highlight-indent-guides)
-    (add-hook 'prog-mode-hook
-              (lambda ()
-                (interactive)
-                (if (< (count-lines-buffer) 1000)
-                    (highlight-indent-guides-mode)))))
-
-(add-hook 'prog-mode-hook
-          (lambda ()
-            (push '("<=" . ?≤) prettify-symbols-alist)
-            (push '(">=" . ?≥) prettify-symbols-alist)
-            (push '("<=" . ?≤) prettify-symbols-alist)
-            (push '("&&" . ?⋀) prettify-symbols-alist)
-            (push '("||" . ?⋁) prettify-symbols-alist)
-            (push '("<-" . ?←) prettify-symbols-alist)
-            (push '("->" . ?→) prettify-symbols-alist)
-            (push '(">=" . ?≥) prettify-symbols-alist)
-            (push '("=>" . ?⇒) prettify-symbols-alist)
-            (push '("!=" . ?≠) prettify-symbols-alist)))
-
-(setq iswitchb-buffer-ignore '("^ " "*Completions*" "*Apropos*" "*Backtrace*" "*Help*" "*Buffer List*"))
-
 (global-set-key (kbd "C-o") (lambda () (interactive) (switch-to-buffer (other-buffer))))
 (global-set-key (kbd "C-l") 'switch-to-buffer)
 (global-set-key (kbd "C-h") 'backward-delete-char-untabify)
@@ -147,9 +122,10 @@
 (defun font-exists-p (font)
   (if (null (x-list-fonts font)) nil t))
 
-(if (font-exists-p "Fantasque Sans Mono-12")
-    (set-default-font "Fantasque Sans Mono-12")
-  (set-default-font "Monospace-9"))
+(if (window-system)
+    (if (font-exists-p "Fantasque Sans Mono-12")
+        (set-default-font "Fantasque Sans Mono-12")
+      (set-default-font "Monospace-9")))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -278,6 +254,8 @@
   (interactive)
   (tide-setup)
   (flycheck-mode +1)
+  (flycheck-add-next-checker 'javascript-eslint '(t . tsx-tide) 'append)
+  (flycheck-select-checker 'javascript-eslint)
   (setq flycheck-check-syntax-automatically '(save mode-enabled))
   (eldoc-mode +1)
   (tide-hl-identifier-mode +1)
@@ -308,11 +286,9 @@
 (add-hook 'web-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c C-l") 'comment-region)))
-;; enable typescript-tslint checker
-;; (flycheck-add-mode 'typescript-tslint 'web-mode)
 
 (with-eval-after-load 'flycheck
-  (flycheck-add-mode 'typescript-tslint 'web-mode)
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
   )
 
 (setq web-mode-markup-indent-offset 2)
@@ -333,6 +309,8 @@
 
 (defun tide-format-before-save ())
 
+(global-set-key (kbd "M-r") 'tide-references)
+
 (require 'prettier-js)
 
 (setq-default fill-column 80)
@@ -341,10 +319,6 @@
 (add-hook 'tide-mode-hook 'prettier-js-mode)
 
 (setq sh-basic-offset 2)
-
-;; Helm
-
-; (require 'helm-config)
 
 ;; Projectile
 
@@ -356,3 +330,25 @@
 (setq company-async-timeout 5)
 
 (setq web-mode-auto-close-style 2)
+
+(add-hook 'comint-output-filter-functions
+          'comint-truncate-buffer)
+
+(global-set-key (kbd "C-c ?") 'magit-log-buffer-file)
+(global-set-key (kbd "C-c r") 'tide-rename-symbol)
+(global-set-key (kbd "C-c i") 'tide-organize-imports)
+
+(global-set-key (kbd "<f3>") (lambda () (interactive) (shell-command "free -h")))
+
+(setq css-indent-offset 2)
+
+(defun my/use-eslint-from-node-modules ()
+  (let* ((root (locate-dominating-file
+                (or (buffer-file-name) default-directory)
+                "node_modules"))
+         (eslint (and root
+                      (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                        root))))
+    (when (and eslint (file-executable-p eslint))
+      (setq-local flycheck-javascript-eslint-executable eslint))))
+(add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
