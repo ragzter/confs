@@ -352,3 +352,5 @@
     (when (and eslint (file-executable-p eslint))
       (setq-local flycheck-javascript-eslint-executable eslint))))
 (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
+
+(setq haskell-process-args-ghci '("-ferror-spans" "-Wall"))
