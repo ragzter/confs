@@ -1,4 +1,4 @@
 xterm*faceName: Fantasque Sans Mono
 xterm*faceSize: 12
-xterm*background: gray6
+xterm*background: #232323
 xterm*foreground: paleturquoise

@@ -6,8 +6,7 @@ set -ex
 
 # Install things I want
 
-sudo apt install fonts-fantasque-sans dmenu xmonad zsh xinit git sudo virtualbox-guest-utils virtualbox-guest-x11
-
+sudo apt install fonts-fantasque-sans dmenu xmonad fish xinit git sudo
 ## Emacs
 
 ### Get packages needed for compiling
@@ -47,3 +46,9 @@ mkdir -p ~/.xmonad/
 ln -s `pwd`/xmonad.hs ~/.xmonad/xmonad.hs
 ln -s `pwd`/.zshrc ~/.zshrc
 ln -s `pwd`/.Xresources ~/.Xresources
+mkdir -p ~/.config
+mkdir -p ~/.config/fish
+mkdir -p ~/.config/fish/functions
+ln -s `pwd`/fish/config.fish ~/.config/fish
+ln -s `pwd`/fish/fish_variables ~/.config/fish
+ln -s `pwd`/fish/functions/fish_prompt.fish ~/.config/fish/functions/fish_prompt.fish

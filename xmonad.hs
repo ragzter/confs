@@ -13,9 +13,11 @@ import XMonad.Prompt.Window
 import XMonad.Layout.BinarySpacePartition
 
 startup :: X ()
+-- startup = return ()
 startup = do
+  spawn "xset r rate 200 30"
   spawnOn "1" "emacs"
-  spawnOn "2" "firefox"
+  spawnOn "2" "google-chrome"
   spawnOn "3" "xterm"
   spawnOn "3" "xterm"
 
@@ -23,6 +25,7 @@ main = xmonad $ def { modMask = mod4Mask
                     , layoutHook = emptyBSP
                     , startupHook = startup
                     , manageHook = manageSpawn
+                    , focusedBorderColor = "#FF00FF"
                     }
                     `additionalKeysP`
                     [ ("C-t C-t", toggleWS)

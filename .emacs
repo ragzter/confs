@@ -20,7 +20,7 @@
    '(centered-cursor-mode
      projectile
      haskell-mode
-     highlight-indent-guides
+     company
      magit
      prettier-js
      tide
@@ -60,7 +60,7 @@
          (beginning-of-line))))
 
 (global-set-key (kbd "C-a") 'smart-beginning-of-line)
-(global-set-key (kbd "C-S-h") 'kill-whole-line)
+(global-set-key (kbd "C-S-k") 'kill-whole-line)
 
 (menu-bar-mode -1)
 (tool-bar-mode -1)
@@ -71,8 +71,10 @@
 (show-paren-mode 1)
 (ido-mode)
 
+(defvar tide-electric-pairs '((?' . ?')) "Electric pairs for org-mode.")
+
 (defun ts-add-electric-pairs ()
-  (setq-local electric-pair-pairs (append electric-pair-pairs '((?\' . ?\'))))
+  (setq-local electric-pair-pairs (append electric-pair-pairs tide-electric-pairs))
   (setq-local electric-pair-text-pairs electric-pair-pairs))
 
 (add-hook 'tide-mode-hook 'ts-add-electric-pairs)
@@ -102,6 +104,8 @@
                 (if (< (count-lines-buffer) 1000)
                     (centered-cursor-mode)))))
 
+(add-hook 'org-mode 'centered-cursor-mode)
+
 (global-set-key (kbd "C-o") (lambda () (interactive) (switch-to-buffer (other-buffer))))
 (global-set-key (kbd "C-l") 'switch-to-buffer)
 (global-set-key (kbd "C-h") 'backward-delete-char-untabify)
@@ -109,35 +113,35 @@
 (global-set-key (kbd "C-z") 'company-complete)
 (global-set-key (kbd "M-p") 'scroll-down-line)
 (global-set-key (kbd "M-n") 'scroll-up-line)
-(global-set-key (kbd "C-x g") 'magit-status)
 
 (global-set-key (kbd "C-c C-l") 'comment-region)
 (global-set-key (kbd "C-c C-/") 'uncomment-region)
-
-(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
-(global-set-key (kbd "C->") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
 (defun font-exists-p (font)
   (if (null (x-list-fonts font)) nil t))
 
 (if (window-system)
     (if (font-exists-p "Fantasque Sans Mono-12")
-        (set-default-font "Fantasque Sans Mono-12")
-      (set-default-font "Monospace-9")))
+        (set-frame-font "Fantasque Sans Mono-12")
+      (set-frame-font "Monospace-9")))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (wombat)))
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(ansi-color-names-vector
+   ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
+ '(custom-enabled-themes (quote (deeper-blue)))
+ '(default-input-method "swedish-postfix")
+ '(global-color-identifiers-mode t)
  '(js2-ignored-warnings (quote ("")))
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
    (quote
-    (company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript typescript-mode php-mode rjsx-mode magit idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
+    (selectrum smartparens move-text beacon direx rainbow-delimiters avy which-key google-this forge ripgrep company-prescient prescient use-package company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript typescript-mode php-mode rjsx-mode idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -146,76 +150,15 @@
  ;; If there is more than one, they won't work right.
  )
 
-(global-hl-line-mode)
+;; (global-hl-line-mode)
 
-(set-face-background hl-line-face "#101010")
-(set-face-attribute hl-line-face nil :underline nil)
-(set-face-foreground 'highlight nil)
+;; (set-face-background hl-line-face "#406060")
+;;(set-face-attribute hl-line-face nil :underline nil)
+;; (set-face-foreground 'highlight nil)
+;; (set-face-foreground 'highlight t)
 
 (set-cursor-color "orange")
 (setq-default cursor-type 'hbar)
-
-(defun find-overlays-specifying (prop pos)
-  (let ((overlays (overlays-at pos))
-        found)
-    (while overlays
-      (let ((overlay (car overlays)))
-        (if (overlay-get overlay prop)
-            (setq found (cons overlay found))))
-      (setq overlays (cdr overlays)))
-    found))
-
-(defun highlight-or-dehighlight-line ()
-  (interactive)
-  (if (find-overlays-specifying
-       'line-highlight-overlay-marker
-       (line-beginning-position))
-      (remove-overlays (line-beginning-position) (+ 1 (line-end-position)))
-    (let ((overlay-highlight (make-overlay
-                              (line-beginning-position)
-                              (+ 1 (line-end-position)))))
-        (overlay-put overlay-highlight 'face '(:background "#006030"))
-        (overlay-put overlay-highlight 'line-highlight-overlay-marker t))))
-
-(global-set-key (kbd "C-c C-c") 'highlight-or-dehighlight-line)
-
-(define-skeleton if-skeleton
-  "If skeleton"
-  nil
-  > "if ("
-  _
-  ") {\n"
-  > "\n"
-  "}"
-  >
-  )
-
-(define-skeleton else-skeleton
-  "Else skeleton"
-  nil
-  " else {\n"
-  > _ "\n"
-  "}"
-  >
-  )
-
-(define-skeleton map-skeleton
-  "Map skeleton"
-  nil
-  ".map(e => {\n"
-  > _ "\n"
-  "})"
-  >
-  )
-
-(define-skeleton map-index-skeleton
-  "Map with index skeleton"
-  nil
-  ".map((e, i) => {\n"
-  > _ "\n"
-  "})"
-  >
-  )
 
 (define-skeleton console-skeleton
   "Console skeleton"
@@ -223,25 +166,7 @@
   "console.log(" _ ")"
   )
 
-(global-set-key (kbd "C-c C-i") 'if-skeleton)
-(global-set-key (kbd "C-c C-e") 'else-skeleton)
-(global-set-key (kbd "C-c C-m") 'map-skeleton)
-(global-set-key (kbd "C-c C-S-m") 'map-index-skeleton)
 (global-set-key (kbd "C-c C-p") 'console-skeleton)
-
-(eval-after-load 'autoinsert
-  '(define-auto-insert
-     '("\\.js\\'" . "React skeleton")
-     '(nil
-       "\nimport React from 'react'\n\n"
-       "export default props => {\n"
-       > _
-       "\n}\n")))
-
-(auto-insert-mode)
-
-(if (file-exists-p "~/.emacs_extras.el")
-    (load-file "~/.emacs_extras.el"))
 
 (global-display-line-numbers-mode)
 
@@ -260,7 +185,7 @@
   (eldoc-mode +1)
   (tide-hl-identifier-mode +1)
   (setq-local company-backends
-            '((company-tide company-files)))
+              '((company-tide company-files)))
   (company-mode +1))
 
 ;; aligns annotation to the right hand side
@@ -326,6 +251,9 @@
 (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
+;; this seems broken right now:
+;; (setq projectile-max-file-buffer-count 10)
+
 (setq company-idle-delay 0.2)
 (setq company-async-timeout 5)
 
@@ -335,8 +263,8 @@
           'comint-truncate-buffer)
 
 (global-set-key (kbd "C-c ?") 'magit-log-buffer-file)
+(global-set-key (kbd "C-c f") 'magit-find-file)
 (global-set-key (kbd "C-c r") 'tide-rename-symbol)
-(global-set-key (kbd "C-c i") 'tide-organize-imports)
 
 (global-set-key (kbd "<f3>") (lambda () (interactive) (shell-command "free -h")))
 
@@ -354,3 +282,218 @@
 (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
 
 (setq haskell-process-args-ghci '("-ferror-spans" "-Wall"))
+
+(setq-default display-line-numbers-width 3)
+
+(setq desktop-save-mode 1)
+
+; (desktop-read)
+
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(setq recentf-max-saved-items 25)
+(global-set-key (kbd "C-x C-r") 'recentf-open-files)
+(global-set-key (kbd "C-=") 'hs-show-all)
+(global-set-key (kbd "C--") 'hs-toggle-hiding)
+
+(global-set-key (kbd "C-c C-e") 'sql-send-paragraph)
+
+(add-hook 'tide-mode-hook 'hs-minor-mode)
+
+(require 'use-package)
+
+(use-package ripgrep
+  :bind (("C-c /" . projectile-ripgrep))
+  :ensure)
+
+(setq tab-width 2)
+(setq-default tab-width 2)
+
+(use-package forge
+  :bind (("C-c i" . forge-list-assigned-issues)
+         ("C-c h" . forge-list-requested-reviews)
+         ("C-c l" . forge-list-authored-pullreqs))
+  :after magit
+  :ensure)
+
+(setq forge-topic-list-limit '(10 . 5))
+
+(setq magit-section-initial-visibility-alist
+      (list
+       '(stashes . show)
+       '(unpushed . show)
+       '(unpulled . show)
+       '(pullreqs . show)
+       '(issues . show)
+       ))
+
+(setq vc-follow-symlinks t)
+
+(setq magit-loaded nil)
+;; (global-set-key (kbd "C-x g") 'magit-status)
+
+(global-set-key (kbd "C-x g")
+                (lambda ()
+                  (interactive)
+                  (magit-status)
+                  (if (not magit-loaded)
+                      (progn
+                        (forge-pull)
+                        (magit-toggle-margin)
+                        (magit-toggle-margin-details)
+                        (magit-refresh)
+                        (setq magit-loaded t)))))
+
+(use-package google-this
+  :custom
+;;  (google-this-wrap-in-quotes t)
+  (google-this-browse-url-function
+   (lambda (url)
+     (browse-url url)))
+  :bind (("C-c g" . google-this))
+  :ensure)
+
+;; (run-with-idle-timer 180 nil (lambda () (forge-pull)))
+
+(use-package which-key
+  :bind (("<f6>" . which-key-show-top-level)
+         ("<f7>" . which-key-show-full-keymap))
+  :ensure)
+
+(global-set-key (kbd "M-/") 'quick-calc)
+
+(setq which-key-paging-prefixes '("C-x"))
+
+(which-key-mode)
+
+;; which-key-mode
+;; which-key-show-top-level
+;; which-key-show-full-keymap
+;; Good keys: C-c n, C-c C-n, C-x C-n, C-,
+
+(use-package avy
+  :bind (("C-'" . avy-goto-line)
+         ("M-'" . avy-goto-end-of-line)
+         ("C-." . avy-goto-char-timer)
+         ("C-c K" . avy-kill-whole-line)
+         ("C-c k" . avy-kill-region)
+         ("C-c s" . avy-kill-ring-save-region)
+         ("C-c m" . avy-move-region)
+         ("C-c c" . avy-copy-region))
+  :ensure)
+
+(use-package rainbow-delimiters
+  :init
+  (progn
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+    (add-hook 'text-mode-hook 'rainbow-delimiters-mode))
+  :ensure)
+
+(use-package direx
+  :bind (("C-c C-c" . direx-project:jump-to-project-root))
+  :ensure)
+
+(use-package beacon
+  :init
+  (beacon-mode)
+  :ensure)
+
+(use-package move-text
+  :bind (("M-p" . move-text-up)
+         ("M-n" . move-text-down))
+  :ensure)
+
+(defun newline-next-line ()
+  (interactive)
+  (end-of-line)
+  (newline)
+  (indent-for-tab-command))
+
+(global-set-key (kbd "C-j") 'newline-next-line)
+
+;; (use-package smartparens
+;;   :bind (("C-M-a" . sp-beginning-of-sexp)
+;;          ("C-M-e" . sp-end-of-sexp)
+;;          ("C-M-f" . sp-forward-sexp)
+;;          ("C-M-b" . sp-backward-sexp)
+;;          ("C-M-k" . sp-kill-sexp)
+;;          ("C-k"   . sp-kill-hybrid-sexp)
+;;          ("M-k"   . sp-backward-kill-sexp)
+;;          ("C-M-w" . sp-copy-sexp))
+;; ;;  :custom
+;; ;;  (smartparens-strict-mode t)
+;;   :init
+;;   (smartparens-global-strict-mode)
+;;   :ensure)
+
+(defun diff-file ()
+  (interactive)
+  (diff-buffer-with-file (buffer-name))
+  (next-window-any-frame))
+
+(defun revert ()
+  (interactive)
+  (revert-buffer nil t t))
+
+;; (use-package org
+;;   :bind ("C-c C-d" . diff-file))
+
+;;  (sp-local-pair 'org-mode "*" nil)
+;; (add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook #'turn-off-smartparens-mode)
+
+(setq org-hide-leading-stars t)
+
+(global-set-key (kbd "C-c C-d") 'diff-file)
+(global-set-key (kbd "C-c C-r") 'revert)
+
+;; `org-mode' key overrides
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-'") 'avy-goto-line))
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-d") 'diff-file))
+(with-eval-after-load 'org
+  (define-key web-mode-map (kbd "C-c C-d") 'diff-file))
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-r") 'revert))
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-h") 'backward-delete-char))
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "M-h") 'backward-kill-word))
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c k") 'avy-kill-region))
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c K") 'avy-kill-whole-line))
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c m") 'avy-move-region))
+
+;; `web-mode' key overrides
+(with-eval-after-load
+    'web-mode
+  (define-key web-mode-map (kbd "C-c C-r") 'revert))
+
+(add-hook 'emacs-lisp-mode 'company-mode)
+
+(global-company-mode)
+
+;; Local electric pair delimiters in `org-mode'
+
+(defvar org-electric-pairs '((?~ . ?~)) "Electric pairs for org-mode.")
+
+(defun org-add-electric-pairs ()
+  (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
+  (setq-local electric-pair-text-pairs electric-pair-pairs))
+
+(add-hook 'org-mode-hook 'org-add-electric-pairs)
+
+(global-set-key (kbd "C-c e") 'goto-line)
+
+(use-package selectrum
+  :init
+  (selectrum-mode +1)
+  :ensure)
+
+;; Load extras
+
+(if (file-exists-p "~/.emacs_extras.el")
+    (load-file "~/.emacs_extras.el"))

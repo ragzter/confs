@@ -1,4 +1,9 @@
-clear lock
-clear control
+! keycode 34 = slash question slash question aring aring aring aring
+keycode 94 = aring Aring
+keycode 133 = emdash
+keycode 134 = U00C4
+keycode 135 = U00F6
+
 keycode 66 = Control_L
-add control = Control_L Control_R
+clear Lock
+! clear control
