@@ -69,7 +69,7 @@
 
 (electric-pair-mode 1)
 (show-paren-mode 1)
-(ido-mode)
+; (ido-mode)
 
 (defvar tide-electric-pairs '((?' . ?')) "Electric pairs for org-mode.")
 
