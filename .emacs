@@ -531,9 +531,20 @@
 (define-key company-active-map (kbd "C-n") 'company-select-next)
 (define-key company-active-map (kbd "C-p") 'company-select-previous)
 (define-key company-active-map (kbd "C-/") 'company-show-location)
+(define-key company-active-map (kbd "C--") 'company-show-doc-buffer)
 (define-key company-active-map (kbd "<tab>") 'company-complete-selection)
 
 (setq org-hide-emphasis-markers t)
+
+(require 'color)
+
+(let ((bg (face-attribute 'default :background)))
+  (custom-set-faces
+   `(company-tooltip ((t (:inherit default :background ,(color-lighten-name bg 2)))))
+   `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 5)))))
+   `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 10)))))
+   `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
+   `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
 
 ;; Load extras
 
