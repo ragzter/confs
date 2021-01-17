@@ -141,7 +141,7 @@
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
    (quote
-    (selectrum smartparens move-text beacon direx rainbow-delimiters avy which-key google-this forge ripgrep company-prescient prescient use-package company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript typescript-mode php-mode rjsx-mode idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
+    (marginalia selectrum-prescient consult selectrum smartparens move-text beacon direx rainbow-delimiters avy which-key google-this forge ripgrep company-prescient prescient use-package company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript typescript-mode php-mode rjsx-mode idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -293,8 +293,8 @@
 (setq recentf-max-menu-items 25)
 (setq recentf-max-saved-items 25)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
-(global-set-key (kbd "C-=") 'hs-show-all)
-(global-set-key (kbd "C--") 'hs-toggle-hiding)
+;; (global-set-key (kbd "C-=") 'hs-show-all)
+;; (global-set-key (kbd "C--") 'hs-toggle-hiding)
 
 (global-set-key (kbd "C-c C-e") 'sql-send-paragraph)
 
@@ -486,12 +486,54 @@
 
 (add-hook 'org-mode-hook 'org-add-electric-pairs)
 
-(global-set-key (kbd "C-c e") 'goto-line)
-
 (use-package selectrum
   :init
   (selectrum-mode +1)
   :ensure)
+
+(use-package selectrum-prescient
+  :init
+  (selectrum-prescient-mode +1)
+  :ensure)
+
+(use-package prescient
+  :init
+  (prescient-persist-mode +1)
+  :ensure)
+
+(use-package company-prescient
+  :init
+  (company-prescient-mode +1)
+  :ensure)
+
+(use-package consult
+  :init
+  :bind (("C-l" . consult-buffer)
+         ("C-c e" . consult-goto-line)
+         ("C-c /" . consult-git-grep)
+         ("C-c o" . consult-grep)
+         ("M-y" . consult-yank-pop))
+  :ensure)
+
+(use-package marginalia
+  :init
+  (marginalia-mode +1)
+  (setq-default marginalia-annotators '(marginalia-annotators-heavy))
+  :ensure)
+
+(setq projectile-completion-system 'default)
+
+;; C-- C-x o is super useful for recursive editing
+
+(global-set-key (kbd "C-M-p") 'previous-multiframe-window)
+(global-set-key (kbd "C-M-n") 'other-window)
+
+(define-key company-active-map (kbd "C-n") 'company-select-next)
+(define-key company-active-map (kbd "C-p") 'company-select-previous)
+(define-key company-active-map (kbd "C-/") 'company-show-location)
+(define-key company-active-map (kbd "<tab>") 'company-complete-selection)
+
+(setq org-hide-emphasis-markers t)
 
 ;; Load extras
 
