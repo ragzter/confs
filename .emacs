@@ -35,8 +35,6 @@
 
 (install-packages)
 
-(set-fringe-mode 0)
-
 (setq inhibit-startup-screen t)
 (setq tab-width 2)
 (setq js-indent-level 2)
@@ -71,9 +69,10 @@
 (show-paren-mode 1)
 ; (ido-mode)
 
-(defvar tide-electric-pairs '((?' . ?')) "Electric pairs for org-mode.")
+(defvar tide-electric-pairs '((?' . ?') (?< . ?>) (?` . ?`)) "Electric pairs for tide-mode.")
 
 (defun ts-add-electric-pairs ()
+  (interactive)
   (setq-local electric-pair-pairs (append electric-pair-pairs tide-electric-pairs))
   (setq-local electric-pair-text-pairs electric-pair-pairs))
 
@@ -125,6 +124,11 @@
         (set-frame-font "Fantasque Sans Mono-12")
       (set-frame-font "Monospace-9")))
 
+;; (if (window-system)
+;;     (if (font-exists-p "Terminus-9")
+;;         (set-frame-font "Terminus-9")
+;;       (set-frame-font "Monospace-9")))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -134,21 +138,27 @@
    [default default default italic underline success warning error])
  '(ansi-color-names-vector
    ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
- '(custom-enabled-themes (quote (deeper-blue)))
+ '(custom-enabled-themes '(wombat))
  '(default-input-method "swedish-postfix")
  '(global-color-identifiers-mode t)
- '(js2-ignored-warnings (quote ("")))
+ '(js2-ignored-warnings '(""))
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
-   (quote
-    (marginalia selectrum-prescient consult selectrum smartparens move-text beacon direx rainbow-delimiters avy which-key google-this forge ripgrep company-prescient prescient use-package company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript typescript-mode php-mode rjsx-mode idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides))))
+   '(json-mode expand-region goto-last-change dimmer marginalia selectrum-prescient consult selectrum smartparens move-text beacon direx rainbow-delimiters avy which-key google-this forge ripgrep company-prescient prescient use-package company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript typescript-mode php-mode rjsx-mode idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(company-preview ((t (:inherit font-lock-variable-name-face :background "#220024d635d6"))))
+ '(company-preview-common ((t (:inherit font-lock-variable-name-face :background "#220024d635d6"))))
+ '(company-scrollbar-bg ((t (:background "#220024d635d6"))))
+ '(company-scrollbar-fg ((t (:background "#2be92f924587"))))
+ '(company-tooltip ((t (:inherit default :background "#1c0e1e652c6c"))))
+ '(company-tooltip-common ((t (:inherit font-lock-constant-face))))
+ '(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
+ '(fringe ((t (:background "#1e0a208a2f8f")))))
 
 ;; (global-hl-line-mode)
 
@@ -322,6 +332,7 @@
       (list
        '(stashes . show)
        '(unpushed . show)
+       '(unmerged . show)
        '(unpulled . show)
        '(pullreqs . show)
        '(issues . show)
@@ -372,14 +383,21 @@
 ;; Good keys: C-c n, C-c C-n, C-x C-n, C-,
 
 (use-package avy
+  :init
+  (setq avy-timeout-seconds 0.25)
   :bind (("C-'" . avy-goto-line)
          ("M-'" . avy-goto-end-of-line)
-         ("C-." . avy-goto-char-timer)
+         ("C-." . avy-goto-word-1)
          ("C-c K" . avy-kill-whole-line)
          ("C-c k" . avy-kill-region)
          ("C-c s" . avy-kill-ring-save-region)
+         ("C-c S" . avy-kill-ring-save-whole-line)
          ("C-c m" . avy-move-region)
-         ("C-c c" . avy-copy-region))
+         ("C-c M" . avy-move-line)
+         ("C-c c" . avy-copy-region)
+         ("C-c C" . avy-copy-line)
+         ("C-3" . avy-isearch)
+         ("C-2" . avy-resume))
   :ensure)
 
 (use-package rainbow-delimiters
@@ -466,6 +484,8 @@
   (define-key org-mode-map (kbd "C-c K") 'avy-kill-whole-line))
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c m") 'avy-move-region))
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-,") 'execute-extended-command))
 
 ;; `web-mode' key overrides
 (with-eval-after-load
@@ -510,7 +530,7 @@
   :init
   :bind (("C-l" . consult-buffer)
          ("C-c e" . consult-goto-line)
-         ("C-c /" . consult-git-grep)
+;;         ("C-c /" . consult-git-grep)
          ("C-c o" . consult-grep)
          ("M-y" . consult-yank-pop))
   :ensure)
@@ -525,14 +545,15 @@
 
 ;; C-- C-x o is super useful for recursive editing
 
-(global-set-key (kbd "C-M-p") 'previous-multiframe-window)
-(global-set-key (kbd "C-M-n") 'other-window)
+;; (global-set-key (kbd "C-2") 'previous-multiframe-window)
+;; (global-set-key (kbd "C-3") 'other-window)
 
 (define-key company-active-map (kbd "C-n") 'company-select-next)
 (define-key company-active-map (kbd "C-p") 'company-select-previous)
 (define-key company-active-map (kbd "C-/") 'company-show-location)
 (define-key company-active-map (kbd "C--") 'company-show-doc-buffer)
-(define-key company-active-map (kbd "<tab>") 'company-complete-selection)
+(define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
+(define-key company-active-map (kbd "C-m") 'company-complete-selection)
 
 (setq org-hide-emphasis-markers t)
 
@@ -544,7 +565,81 @@
    `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 5)))))
    `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 10)))))
    `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
-   `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
+   `(company-tooltip-common ((t (:inherit font-lock-constant-face))))
+   `(company-preview ((t (:inherit font-lock-variable-name-face :background ,(color-lighten-name bg 5)))))
+   `(company-preview-common ((t (:inherit font-lock-variable-name-face :background ,(color-lighten-name bg 5)))))))
+
+(set-fringe-mode 0)
+
+;; (set-fringe-mode 10)
+
+;; (set-face-attribute 'fringe nil
+;;                     :foreground (face-foreground 'default)
+;;                     :background (face-background 'default))
+
+(let ((bg (face-attribute 'default :background)))
+  (custom-set-faces
+   `(fringe ((t (:background ,(color-lighten-name bg 3)))))))
+
+(global-set-key (kbd "C-,") 'execute-extended-command)
+
+(add-hook 'org-mode-hook
+          (lambda () (set-face-attribute 'org-code nil :foreground "SeaGreen2" :italic t :bold nil)))
+                                        ; (set-face-attribute 'org-code nil :foreground "SeaGreen2")
+
+(use-package dimmer
+  :bind (("C-9" . dimmer-mode))
+  :init
+  (dimmer-mode +1)
+  (setq dimmer-fraction 0.5)
+  :ensure)
+
+(use-package goto-last-change
+  :bind (("C-/" . goto-last-change))
+  :ensure)
+
+(global-set-key (kbd "C--") 'other-window)
+
+(defun reload-file ()
+  "For the unfortunate times when modes get broken."
+  (interactive)
+  (let ((current-file (buffer-file-name))
+        (current-point (point)))
+    (kill-buffer)
+    (find-file current-file)
+    (goto-char current-point)))
+
+(global-set-key (kbd "C-c C-'") 'reload-file)
+
+(global-set-key (kbd "<C-left>") 'shrink-window-horizontally)
+(global-set-key (kbd "<C-right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "<C-down>") 'shrink-window)
+(global-set-key (kbd "<C-up>") 'enlarge-window)
+
+(setq org-link-frame-setup '((file . find-file)))
+
+(global-set-key (kbd "C-=") (lambda () (interactive) (kill-buffer (current-buffer))))
+
+(use-package multiple-cursors
+  :bind (("C-S-c C-S-c" . mc/edit-lines)
+         ("C->" . mc/mark-next-like-this-word)
+         ("C-<" . mc/mark-previous-like-this-word)
+         ("C-S-l" . mc/edit-ends-of-lines)
+         ("C-?" . mc/mark-pop))
+  :ensure)
+
+(delete-selection-mode t)
+
+(setq gc-cons-threshold 80000000)
+(setq read-process-output-max (* 1024 1024))
+
+(use-package expand-region
+  :bind (("C-4" . er/contract-region)
+         ("C-5" . er/expand-region))
+  :ensure)
+
+(use-package json-mode
+  :ensure)
 
 ;; Load extras
 
