@@ -144,7 +144,7 @@
  '(js2-ignored-warnings '(""))
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
-   '(json-mode expand-region goto-last-change dimmer marginalia selectrum-prescient consult selectrum smartparens move-text beacon direx rainbow-delimiters avy which-key google-this forge ripgrep company-prescient prescient use-package company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript typescript-mode php-mode rjsx-mode idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides)))
+   '(json-mode expand-region goto-last-change dimmer marginalia selectrum-prescient consult selectrum smartparens move-text beacon direx rainbow-delimiters avy which-key google-this forge ripgrep company-prescient prescient use-package company projectile helm rust-mode prettier-js web-mode tide company-lsp flycheck lsp-ui lsp-typescript php-mode rjsx-mode idris-mode multiple-cursors centered-cursor-mode haskell-mode highlight-indent-guides)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -156,6 +156,7 @@
  '(company-scrollbar-bg ((t (:background "#220024d635d6"))))
  '(company-scrollbar-fg ((t (:background "#2be92f924587"))))
  '(company-tooltip ((t (:inherit default :background "#1c0e1e652c6c"))))
+ '(company-tooltip-annotation ((t (:inherit font-lock-keyword-face))))
  '(company-tooltip-common ((t (:inherit font-lock-constant-face))))
  '(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
  '(fringe ((t (:background "#1e0a208a2f8f")))))
@@ -189,9 +190,24 @@
   (interactive)
   (tide-setup)
   (flycheck-mode +1)
+
+  ;; Use same checker for "ts" file extension as with "tsx".
+  (flycheck-define-generic-checker 'tsx-tide
+    "A TSX syntax checker using tsserver."
+    :start #'tide-flycheck-start
+    :verify #'tide-flycheck-verify
+    :modes '(web-mode)
+    :predicate (lambda ()
+                 (and
+                  (tide-file-extension-p "ts")
+                  (tide-flycheck-predicate))))
+
   (flycheck-add-next-checker 'javascript-eslint '(t . tsx-tide) 'append)
   (flycheck-select-checker 'javascript-eslint)
-  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  ;; (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (setq flycheck-check-syntax-automatically '(save idle-change))
+  (setq tide-completion-detailed nil)
+  (setq tide-completion-show-source t)
   (eldoc-mode +1)
   (tide-hl-identifier-mode +1)
   (setq-local company-backends
@@ -203,9 +219,12 @@
 
 (add-hook 'typescript-mode-hook #'setup-tide-mode)
 
+(setq tide-server-max-response-length 2147483647)
+
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . web-mode))
 (add-hook 'web-mode-hook
           (lambda ()
             (when (string-equal "tsx" (file-name-extension buffer-file-name))
@@ -231,7 +250,7 @@
 
 (setq web-mode-content-types-alist
       '(("jsx" . "\\.js[x]?\\'")
-        ("jsx" . "\\.tsx?\\'")))
+        ("jsx" . "\\.ts[x]?\\'")))
 
 (setq web-mode-enable-auto-quoting nil)
 
@@ -275,20 +294,27 @@
 (global-set-key (kbd "C-c ?") 'magit-log-buffer-file)
 (global-set-key (kbd "C-c f") 'magit-find-file)
 (global-set-key (kbd "C-c r") 'tide-rename-symbol)
+(global-set-key (kbd "C-c R") 'tide-rename-file)
 
 (global-set-key (kbd "<f3>") (lambda () (interactive) (shell-command "free -h")))
 
 (setq css-indent-offset 2)
 
+;; (defun my/use-eslint-from-node-modules ()
+;;   (let* ((root (locate-dominating-file
+;;                 (or (buffer-file-name) default-directory)
+;;                 "node_modules"))
+;;          (eslint (and root
+;;                       (expand-file-name "node_modules/eslint/bin/eslint.js"
+;;                                         root))))
+;;     (when (and eslint (file-executable-p eslint))
+;;       (setq-local flycheck-javascript-eslint-executable eslint))))
+
 (defun my/use-eslint-from-node-modules ()
-  (let* ((root (locate-dominating-file
-                (or (buffer-file-name) default-directory)
-                "node_modules"))
-         (eslint (and root
-                      (expand-file-name "node_modules/eslint/bin/eslint.js"
-                                        root))))
+  (let* ((eslint "~/.yarn/bin/eslint_d"))
     (when (and eslint (file-executable-p eslint))
       (setq-local flycheck-javascript-eslint-executable eslint))))
+
 (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
 
 (setq haskell-process-args-ghci '("-ferror-spans" "-Wall"))
@@ -492,6 +518,9 @@
     'web-mode
   (define-key web-mode-map (kbd "C-c C-r") 'revert))
 
+;; `php-mode' key overrides
+;; (with-eval-after-load 'org (define-key php-mode-map (kbd "C-.") 'avy-goto-word-1))
+
 (add-hook 'emacs-lisp-mode 'company-mode)
 
 (global-company-mode)
@@ -564,14 +593,16 @@
    `(company-tooltip ((t (:inherit default :background ,(color-lighten-name bg 2)))))
    `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 5)))))
    `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 10)))))
-   `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
+   `(company-tooltip-selection ((t (:inherit font-lock-function-name-face :background ,(color-lighten-name bg 10)))))
    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))
    `(company-preview ((t (:inherit font-lock-variable-name-face :background ,(color-lighten-name bg 5)))))
-   `(company-preview-common ((t (:inherit font-lock-variable-name-face :background ,(color-lighten-name bg 5)))))))
+   `(company-preview-common ((t (:inherit font-lock-variable-name-face :background ,(color-lighten-name bg 5)))))
+   `(company-tooltip-annotation ((t (:inherit font-lock-keyword-face))))
+   ))
 
-(set-fringe-mode 0)
+(set-fringe-mode 10)
 
-;; (set-fringe-mode 10)
+;; (set-fringe-mode 0)
 
 ;; (set-face-attribute 'fringe nil
 ;;                     :foreground (face-foreground 'default)
@@ -640,6 +671,8 @@
 
 (use-package json-mode
   :ensure)
+
+(setq prettier-js-show-errors nil)
 
 ;; Load extras
 

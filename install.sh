@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # Warning: This script has not been tested yet
+# Todo: Install `eslint_d`
 
 set -ex
 
 # Install things I want
 
-sudo apt install fonts-fantasque-sans dmenu xmonad fish xinit git sudo
+sudo apt install fonts-fantasque-sans xfonts-terminus dmenu xmonad fish xinit git sudo
 ## Emacs
 
 ### Get packages needed for compiling
