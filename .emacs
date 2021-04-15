@@ -199,7 +199,7 @@
     :modes '(web-mode)
     :predicate (lambda ()
                  (and
-                  (tide-file-extension-p "ts")
+                  (or (tide-file-extension-p "ts") (tide-file-extension-p "tsx"))
                   (tide-flycheck-predicate))))
 
   (flycheck-add-next-checker 'javascript-eslint '(t . tsx-tide) 'append)
