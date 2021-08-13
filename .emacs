@@ -159,7 +159,16 @@
  '(company-tooltip-annotation ((t (:inherit font-lock-keyword-face))))
  '(company-tooltip-common ((t (:inherit font-lock-constant-face))))
  '(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
- '(fringe ((t (:background "#1e0a208a2f8f")))))
+ '(fringe ((t (:background "#1e0a208a2f8f"))))
+ '(rainbow-delimiters-depth-1-face ((t (:inherit rainbow-delimiters-base-face :foreground "light goldenrod"))))
+ '(rainbow-delimiters-depth-2-face ((t (:inherit rainbow-delimiters-base-face :foreground "dark turquoise"))))
+ '(rainbow-delimiters-depth-3-face ((t (:inherit rainbow-delimiters-base-face :foreground "medium slate blue"))))
+ '(rainbow-delimiters-depth-4-face ((t (:inherit rainbow-delimiters-base-face :foreground "goldenrod1"))))
+ '(rainbow-delimiters-depth-5-face ((t (:inherit rainbow-delimiters-base-face :foreground "dodger blue"))))
+ '(rainbow-delimiters-depth-6-face ((t (:inherit rainbow-delimiters-base-face :foreground "MediumOrchid1"))))
+ '(rainbow-delimiters-depth-7-face ((t (:inherit rainbow-delimiters-base-face :foreground "medium spring green"))))
+ '(rainbow-delimiters-depth-8-face ((t (:inherit rainbow-delimiters-base-face :foreground "royal blue"))))
+ '(rainbow-delimiters-depth-9-face ((t (:inherit rainbow-delimiters-base-face :foreground "MediumOrchid1")))))
 
 ;; (global-hl-line-mode)
 
@@ -169,15 +178,8 @@
 ;; (set-face-foreground 'highlight t)
 
 (set-cursor-color "orange")
-(setq-default cursor-type 'hbar)
-
-(define-skeleton console-skeleton
-  "Console skeleton"
-  nil
-  "console.log(" _ ")"
-  )
-
-(global-set-key (kbd "C-c C-p") 'console-skeleton)
+;; (setq-default cursor-type 'hbar)
+(setq-default cursor-type 'box)
 
 (global-display-line-numbers-mode)
 
@@ -205,9 +207,7 @@
   (flycheck-add-next-checker 'javascript-eslint '(t . tsx-tide) 'append)
   (flycheck-select-checker 'javascript-eslint)
   ;; (setq flycheck-check-syntax-automatically '(save mode-enabled))
-  (setq flycheck-check-syntax-automatically '(save idle-change))
-  (setq tide-completion-detailed nil)
-  (setq tide-completion-show-source t)
+  (setq flycheck-check-syntax-automatically '(save)) ;; idle-change
   (eldoc-mode +1)
   (tide-hl-identifier-mode +1)
   (setq-local company-backends
@@ -283,10 +283,24 @@
 ;; this seems broken right now:
 ;; (setq projectile-max-file-buffer-count 10)
 
-(setq company-idle-delay 0.2)
-(setq company-async-timeout 5)
+(setq company-idle-delay nil) ; 0.2
+(setq company-async-timeout 10)
+(setq company-tooltip-limit 20)
+(setq company-tooltip-minimum-width 15)
+(setq company-require-match t)
+(setq company-selection-wrap-around t)
+
+(setq tide-completion-ignore-case t)
+(setq tide-completion-detailed nil)
+(setq tide-completion-show-source t)
+(setq tide-always-show-documentation t)
+(setq tide-hl-identifier-idle-time 0)
+
+(setq flycheck-display-errors-delay 1)
 
 (setq web-mode-auto-close-style 2)
+
+(global-set-key (kbd "C-0") 'flycheck-mode)
 
 (add-hook 'comint-output-filter-functions
           'comint-truncate-buffer)
@@ -406,11 +420,12 @@
 ;; which-key-mode
 ;; which-key-show-top-level
 ;; which-key-show-full-keymap
-;; Good keys: C-c n, C-c C-n, C-x C-n, C-,
+;; Good keys: C-c n, C-c C-n, C-x C-n
 
 (use-package avy
   :init
   (setq avy-timeout-seconds 0.25)
+  (setq avy-keys '(?a ?o ?e ?u ?h ?t ?n ?s ?, ?. ?c ?r ?l))
   :bind (("C-'" . avy-goto-line)
          ("M-'" . avy-goto-end-of-line)
          ("C-." . avy-goto-word-1)
@@ -537,6 +552,8 @@
 
 (use-package selectrum
   :init
+  (setq selectrum-quick-keys '(?a ?o ?e ?u ?h ?t ?n ?s ?, ?. ?c ?r ?l))
+  (setq selectrum-max-window-height 10)
   (selectrum-mode +1)
   :ensure)
 
@@ -558,9 +575,10 @@
 (use-package consult
   :init
   :bind (("C-l" . consult-buffer)
+         ("C-S-l" . consult-buffer-other-window)
          ("C-c e" . consult-goto-line)
 ;;         ("C-c /" . consult-git-grep)
-         ("C-c o" . consult-grep)
+         ("C-c o" . consult-git-grep)
          ("M-y" . consult-yank-pop))
   :ensure)
 
@@ -621,7 +639,7 @@
 (use-package dimmer
   :bind (("C-9" . dimmer-mode))
   :init
-  (dimmer-mode +1)
+  ;; (dimmer-mode +1)
   (setq dimmer-fraction 0.5)
   :ensure)
 
@@ -655,7 +673,6 @@
   :bind (("C-S-c C-S-c" . mc/edit-lines)
          ("C->" . mc/mark-next-like-this-word)
          ("C-<" . mc/mark-previous-like-this-word)
-         ("C-S-l" . mc/edit-ends-of-lines)
          ("C-?" . mc/mark-pop))
   :ensure)
 
@@ -665,14 +682,273 @@
 (setq read-process-output-max (* 1024 1024))
 
 (use-package expand-region
-  :bind (("C-4" . er/contract-region)
-         ("C-5" . er/expand-region))
+  :bind (; ("C-4" . er/contract-region)
+         ("C-4" . er/expand-region)
+         ("C-5" . er/mark-method-call))
   :ensure)
 
 (use-package json-mode
   :ensure)
 
 (setq prettier-js-show-errors nil)
+
+;; Skeletons!
+
+(define-skeleton console-skeleton
+  "Console skeleton"
+  nil
+  > "console.log(" _ ")"
+  )
+(global-set-key (kbd "C-c C-p") 'console-skeleton)
+
+(define-skeleton const-skeleton
+  "Const skeleton"
+  nil
+  > "const " _ " = "
+  )
+
+(define-skeleton return-skeleton
+  "Return skeleton"
+  nil
+  > "return " _
+  )
+
+(define-skeleton function-skeleton
+  "Function skeleton"
+  nil
+  "(" _ ") => {}"
+  )
+
+(define-skeleton async-function-skeleton
+  "Async function skeleton"
+  nil
+  "async (" _ ") => {}"
+  )
+
+(define-skeleton styled-div-skeleton
+  "Styled div skeleton"
+  nil
+  "styled.div`" \n
+  "  " _ \n
+  "`"
+  )
+
+(define-skeleton if-skeleton
+  "If skeleton"
+  nil
+  > "if ("
+  _
+  ") {" \n
+  > "\n"
+  "}"
+  >
+  )
+
+(define-skeleton else-skeleton
+  "Else skeleton"
+  nil
+  " else {" \n
+  > _ \n
+  "}"
+  >
+  )
+
+(define-skeleton space-skeleton
+  "Space skeleton 8)"
+  nil
+  "\n"
+  > _
+  "\n"
+  )
+(global-set-key (kbd "C-c C-.") 'space-skeleton)
+
+(define-skeleton space-block-start-skeleton
+  "Space skeleton 8) at start of block"
+  nil
+  > _
+  "\n"
+  )
+
+(defun goto-line-and-insert-space-skeleton ()
+  (interactive)
+  (avy-goto-line)
+  (save-excursion
+    (previous-line)
+    (setq start-of-block-p (string= (substring (reverse (s-chomp (thing-at-point 'line t))) 0 1) "{")))
+  (if start-of-block-p
+      (space-block-start-skeleton)
+    (space-skeleton)))
+
+(global-set-key (kbd "C-c C-3") (lambda () (interactive) (avy-goto-line) (space-block-start-skeleton)))
+(global-set-key (kbd "C-c C-,") 'goto-line-and-insert-space-skeleton)
+
+(define-abbrev web-mode-abbrev-table "co" "" 'const-skeleton)
+(define-abbrev web-mode-abbrev-table "om" "" 'if-skeleton)
+(define-abbrev web-mode-abbrev-table "el" "" 'else-skeleton)
+(define-abbrev web-mode-abbrev-table "f" "" 'function-skeleton)
+(define-abbrev web-mode-abbrev-table "af" "" 'async-function-skeleton)
+(define-abbrev web-mode-abbrev-table "ret" "return")
+(define-abbrev web-mode-abbrev-table "pos" "position:")
+(define-abbrev web-mode-abbrev-table "rel" "relative;")
+(define-abbrev web-mode-abbrev-table "abs" "absolute;")
+(define-abbrev web-mode-abbrev-table "ma" "margin:")
+(define-abbrev web-mode-abbrev-table "mb" "margin-bottom:")
+(define-abbrev web-mode-abbrev-table "mt" "margin-top:")
+(define-abbrev web-mode-abbrev-table "ml" "margin-left:")
+(define-abbrev web-mode-abbrev-table "mr" "margin-right:")
+(define-abbrev web-mode-abbrev-table "pa" "padding:")
+(define-abbrev web-mode-abbrev-table "pb" "padding-bottom:")
+(define-abbrev web-mode-abbrev-table "pt" "padding-top:")
+(define-abbrev web-mode-abbrev-table "pl" "padding-left:")
+(define-abbrev web-mode-abbrev-table "pr" "padding-right:")
+(define-abbrev web-mode-abbrev-table "fs" "font-size:")
+(define-abbrev web-mode-abbrev-table "ff" "font-family:")
+(define-abbrev web-mode-abbrev-table "df" "display: flex;")
+(define-abbrev web-mode-abbrev-table "bc" "background-color:")
+(define-abbrev web-mode-abbrev-table "lh" "line-height:")
+(define-abbrev web-mode-abbrev-table "sd" "" 'styled-div-skeleton)
+(define-abbrev web-mode-abbrev-table "ed" "export default ")
+
+(define-skeleton styled-components-inline
+  "Inline function for styled-components"
+  nil
+  "${(p) => " _ "};"
+  )
+
+(define-abbrev web-mode-abbrev-table "si" "" 'styled-components-inline)
+
+(define-skeleton translation
+  "Translation"
+  nil
+  "t('" _ "')"
+  )
+
+(define-abbrev web-mode-abbrev-table "si" "" 'styled-components-inline)
+(define-abbrev web-mode-abbrev-table "tr" "" 'translation)
+
+(define-skeleton state-skeleton
+  "Write a state declaration"
+  "Name: "
+  "const [" str ", set" (s-upper-camel-case str) "] = useState(" _ ")")
+
+(define-abbrev web-mode-abbrev-table "st" "" 'state-skeleton)
+
+(define-skeleton effect-skeleton
+  "Write an effect"
+  nil
+  "useEffect (() => {\n" > _ "\n" "}, [])" >)
+
+(define-abbrev web-mode-abbrev-table "ue" "" 'effect-skeleton)
+
+(define-skeleton select-skeleton
+  ""
+  nil
+  "`\nselect\n  " _ "\nfrom\n  \nwhere\n  \n`")
+(define-skeleton update-skeleton
+  ""
+  nil
+  "`\nupdate\n  " _ "\nset\n  \nwhere\n  \n`")
+(define-skeleton delete-skeleton
+  ""
+  nil
+  "`\ndelete from\n  " _ "\nwhere\n  \n`")
+
+(define-abbrev web-mode-abbrev-table "sel" "" 'select-skeleton)
+(define-abbrev web-mode-abbrev-table "upd" "" 'update-skeleton)
+(define-abbrev web-mode-abbrev-table "del" "" 'delete-skeleton)
+
+(eval-after-load 'autoinsert
+  '(define-auto-insert
+     '("\\.tsx\\'" . "React skeleton")
+     '(nil
+       "import React from 'react'\n\n"
+       "const " (reverse (substring (reverse (buffer-name)) 4)) " = () => {\n"
+       > "return <>" _ "</>"
+       "\n}\n\n"
+       "export default " (reverse (substring (reverse (buffer-name)) 4)))))
+;; (eval-after-load 'autoinsert
+;;   '(define-auto-insert
+;;      '("\\.ts\\'" . "TypeScript skeleton")
+;;      '(nil
+;;        "export default () => {\n"
+;;        > _
+;;        "\n}\n\n")))
+(auto-insert-mode)
+(setq auto-insert-query nil)
+
+;; df
+
+(define-key web-mode-map (kbd "C-c C-f") 'tide-fix)
+
+(add-hook 'web-mode-hook 'abbrev-mode)
+
+(use-package s
+  :ensure)
+
+;; (setq tide-tsserver-process-environment '("TSS_LOG=-level verbose -file /home/ragnar/tss.log"))
+(setq tide-sync-request-timeout 120)
+
+;; (defun my-copy-word-and-yank ()
+;;   (interactive)
+;;   (let ((buffer (current-buffer)))
+;;     (save-excursion
+;;       (call-interactively 'avy-goto-word-1)
+;;       (er/mark-word)
+;;       (call-interactively 'kill-ring-save)
+;;       (deactivate-mark)
+;;       (if (not (eq buffer (current-buffer)))
+;;           (call-interactively 'other-window))))
+;;   (yank))
+;;
+;; (defun my-copy-region-and-yank ()
+;;   (interactive)
+;;   (let ((buffer (current-buffer)))
+;;     (save-excursion
+;;       (call-interactively 'avy-goto-word-1)
+;;       (call-interactively 'set-mark-command)
+;;       (call-interactively 'avy-goto-word-1)
+;;       (call-interactively 'kill-ring-save)
+;;       (deactivate-mark)
+;;       (if (not (eq buffer (current-buffer)))
+;;           (call-interactively 'other-window)))
+;;     (yank)))
+;;
+;; (global-set-key (kbd "C-c C-o") 'my-copy-word-and-yank)
+;; (global-set-key (kbd "C-c C-s") 'my-copy-region-and-yank)
+;; (define-key web-mode-map (kbd "C-c C-s") 'my-copy-region-and-yank)
+
+(setq consult-project-root-function 'projectile-project-root)
+
+(defun copy-type-signature ()
+  (interactive)
+  (unless (member last-command '(next-error previous-error))
+    (if (tide-method-call-p)
+        (tide-command:signatureHelp #'tide-eldoc-maybe-show)
+      (when (looking-at "\\s_\\|\\sw")
+        (tide-command:quickinfo
+         (tide-on-response-success-callback response (:ignore-empty t)
+           (let* ((raw (substring-no-properties (seq--into-string (tide-doc-text (plist-get response :body))))))
+                  ;; (s (s-replace " | undefined" "" (car (last (split-string raw ": "))))))
+             (kill-new raw))))))))
+
+(defun copy-type-signature-partial ()
+  (interactive)
+  (unless (member last-command '(next-error previous-error))
+    (if (tide-method-call-p)
+        (tide-command:signatureHelp #'tide-eldoc-maybe-show)
+      (when (looking-at "\\s_\\|\\sw")
+        (tide-command:quickinfo
+         (tide-on-response-success-callback response (:ignore-empty t)
+           (let* ((raw (substring-no-properties (seq--into-string (tide-doc-text (plist-get response :body)))))
+                  (s (s-replace " | undefined" "" (car (last (split-string raw ": "))))))
+             (kill-new s))))))))
+
+(global-set-key (kbd "C-c C-s") 'copy-type-signature)
+(define-key web-mode-map (kbd "C-c C-s") 'copy-type-signature)
+(global-set-key (kbd "C-S-s") 'copy-type-signature-partial)
+(define-key web-mode-map (kbd "C-S-s") 'copy-type-signature-partial)
+
+(setq save-abbrevs nil)
 
 ;; Load extras
 
