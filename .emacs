@@ -950,6 +950,13 @@
 
 (setq save-abbrevs nil)
 
+(use-package rust-mode
+  :init
+  (setq rust-indent-offset 2)
+  (add-to-list 'exec-path "~/.cargo/bin")
+  :bind (("C-c C-c" . rust-run))
+  :ensure)
+
 ;; Load extras
 
 (if (file-exists-p "~/.emacs_extras.el")
