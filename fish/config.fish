@@ -8,3 +8,4 @@ bind \u00E2 backward-word
 bind \u00E8 backward-kill-word
 bind \u00E4 kill-word
 bind \a cancel
+bind \eh backward-kill-word
