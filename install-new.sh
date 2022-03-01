@@ -5,11 +5,12 @@ set -ex
 sudo apt install -y emacs-nox git fish tmux ccrypt
 sudo chsh -s $(which fish) ragnar
 
+mkdir -p ~/.ssh
+
 if [ ! -f ~/.ssh/id_ed25519 ] ; then
   sudo mkdir -p /mnt/cdrom
   sudo umount -q /dev/cdrom || true
   sudo mount /dev/cdrom /mnt/cdrom
-  mkdir -p ~/.ssh
   cp /mnt/cdrom/id_ed25519 ~/.ssh/
   sudo umount /mnt/cdrom
   ccrypt -d ~/.ssh/id_ed25519
@@ -34,3 +35,5 @@ ln -fs `pwd`/.emacs-new ~/.emacs
 ln -fs `pwd`/.tmux.conf ~/.tmux.conf
 ln -fs `pwd`/fish/config.fish ~/.config/fish
 ln -fs `pwd`/fish/functions/fish_prompt.fish ~/.config/fish/functions/fish_prompt.fish
+ln -fs `pwd`/.gitconfig ~/.gitconfig
+ln -fs `pwd`/.ssh/config ~/.ssh/config
