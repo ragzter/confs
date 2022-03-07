@@ -21,8 +21,6 @@
 
 (load-theme 'wombat)
 
-;; Packages
-
 (require 'package)
 
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
@@ -35,9 +33,21 @@
 
 (setq use-package-always-ensure t)
 
-;; Magit
+;; Packages
 
 (use-package magit
   :bind (("C-x g" . 'magit-status)
 	 ("C-c ?" . 'magit-log-buffer-file)
 	 ("C-c f" . 'magit-find-file)))
+
+(use-package selectrum
+  :init
+  (setq selectrum-max-window-height 10)
+  (selectrum-mode +1))
+
+(use-package selectrum-prescient
+  :init
+  (selectrum-prescient-mode +1))
+
+;; (find-file "~/.emacs")
+;; (find-file "~/code/confs/old/.emacs")
