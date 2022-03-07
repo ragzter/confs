@@ -19,6 +19,8 @@
 (global-set-key (kbd "M-h") 'backward-kill-word)
 (global-set-key (kbd "C-,") 'execute-extended-command) ; Can I get this to work in tty?
 
+(load-theme 'wombat)
+
 ;; Packages
 
 (require 'package)
