@@ -12,6 +12,7 @@ if [ ! -f ~/.ssh/id_ed25519 ] ; then
   sudo umount -q /dev/cdrom || true
   sudo mount /dev/cdrom /mnt/cdrom
   cp /mnt/cdrom/id_ed25519 ~/.ssh/
+  sudo chmod 600 ~/.ssh/id_ed25519
   sudo umount /mnt/cdrom
   ccrypt -d ~/.ssh/id_ed25519
 fi
@@ -37,3 +38,4 @@ ln -fs `pwd`/fish/config.fish ~/.config/fish
 ln -fs `pwd`/fish/functions/fish_prompt.fish ~/.config/fish/functions/fish_prompt.fish
 ln -fs `pwd`/.gitconfig ~/.gitconfig
 ln -fs `pwd`/.ssh/config ~/.ssh/config
+
