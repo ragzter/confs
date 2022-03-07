@@ -1,5 +1,6 @@
 set fish_greeting
 set -gx EDITOR emacs
+set -gx TERM xterm-256color
 alias clearAgents="gpg-connect-agent reloadagent /bye && ssh-add -D"
 alias syncTime="sudo ntpdate -u 0.europe.pool.ntp.org"
 alias reloadConfig="source ~/.config/fish/config.fish"
