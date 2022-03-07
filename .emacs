@@ -3,6 +3,7 @@
 (setq inhibit-startup-screen t)
 (setq vc-follow-symlinks t)
 (setq make-backup-files nil)
+(setq custom-file "~/.emacs-custom.el")
 
 (menu-bar-mode -1)
 
